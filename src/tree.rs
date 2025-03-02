@@ -186,7 +186,6 @@ mod tests {
         let initial_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(initial_values, vec![1, 2, 3]);
 
-        // Modify the tree directly, avoiding iterator with borrow issues
         tree.children[0].children.push(Node::new(20));
         tree.children[1].children.push(Node::new(30));
 

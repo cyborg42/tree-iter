@@ -134,7 +134,7 @@ impl<'a, N: TreeNodeMut> TreeMutIter<'a, N, BreadthFirst> {
     /// This method returns a guard that implements `DerefMut` to provide
     /// mutable access to the node. When the guard is dropped, the node's children
     /// are added to the traversal queue in breadth-first order.
-    pub fn next<'b>(&'b mut self) -> Option<MutRefBFSGuard<'a, 'b, N>> {
+    pub fn next(&mut self) -> Option<MutRefBFSGuard<'a, '_, N>> {
         self.nodes.pop_front().map(|node| MutRefBFSGuard {
             iter: self,
             node: Some(node),
@@ -192,7 +192,7 @@ impl<'a, N: TreeNodeMut> TreeMutIter<'a, N, DepthFirst> {
     /// This method returns a guard that implements `DerefMut` to provide
     /// mutable access to the node. When the guard is dropped, the node's children
     /// are added to the traversal queue in depth-first order.
-    pub fn next<'b>(&'b mut self) -> Option<MutRefDFSGuard<'a, 'b, N>> {
+    pub fn next(&mut self) -> Option<MutRefDFSGuard<'a, '_, N>> {
         self.nodes.pop_front().map(|node| MutRefDFSGuard {
             iter: self,
             node: Some(node),
