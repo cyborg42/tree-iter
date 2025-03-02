@@ -1,25 +1,25 @@
 /*!
  * # Tree-Iter
- * 
+ *
  * A Rust library for iterating over tree structures in different traversal orders.
- * 
+ *
  * This library provides traits and implementations for efficient iteration over tree-like data
  * structures in both breadth-first and depth-first traversal orders, with support for both
  * immutable and mutable traversal.
- * 
+ *
  * ## Features
- * 
+ *
  * - Generic support for any tree-like structure
  * - Breadth-first and depth-first traversal orders
  * - Immutable and mutable iteration
  * - Safe interior mutability during traversal using guard patterns
- * 
+ *
  * ## Example
- * 
+ *
  * ```rust
  * use tree_iter::prelude::*;
  * use tree_iter::tree::Node;
- * 
+ *
  * // Create a simple tree
  * let tree = Node {
  *     value: 1,
@@ -34,7 +34,7 @@
  *         },
  *     ],
  * };
- * 
+ *
  * // Iterate over the tree in depth-first order
  * let values: Vec<i32> = tree.iter::<DepthFirst>()
  *                           .map(|node| node.value)

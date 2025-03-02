@@ -7,16 +7,7 @@ A Rust library for iterating over tree structures in different traversal orders.
 - Generic support for any tree-like structure
 - Breadth-first and depth-first traversal orders
 - Immutable and mutable iteration
-- Safe interior mutability during traversal using guard patterns
-
-## Installation
-
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-tree-iter = "0.1.0"
-```
+- Modifying the tree structure during mutable iteration
 
 ## Usage
 
@@ -56,27 +47,44 @@ assert_eq!(values, vec![1, 2, 3]);
 
 ### Mutable Iteration
 
+Mutate nodes during iteration, including modifying values and changing the structure by adding or removing children:
+
 ```rust
 use tree_iter::prelude::*;
 use tree_iter::tree::Node;
 
-// Create a simple tree
 let mut tree = Node {
     value: 1,
     children: vec![
-        Node { value: 2, children: vec![] },
-        Node { value: 3, children: vec![] },
+        Node {
+            value: 2,
+            children: vec![Node {
+                value: 4,
+                children: vec![],
+            }],
+        },
+        Node {
+            value: 3,
+            children: vec![],
+        },
     ],
 };
 
-// Mutably iterate and modify values
-let mut iter = tree.iter_mut::<DepthFirst>();
+// Add 10 to each value in the tree, and add a child to node with value 2
+let mut iter = tree.iter_mut::<BreadthFirst>();
 while let Some(mut node) = iter.next() {
-    node.value *= 2;
+    if node.value == 2 {
+        node.children.push(Node {
+            value: 10,
+            children: vec![],
+        });
+    }
+    node.value += 10;
 }
 
-// Values have been doubled
-assert_eq!(tree.value, 2);
+// Verify values were changed in breadth-first order
+let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|n| n.value).collect();
+assert_eq!(values, vec![11, 12, 13, 14, 20]);
 ```
 
 ### Custom Tree Structures

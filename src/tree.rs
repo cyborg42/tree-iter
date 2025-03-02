@@ -1,21 +1,21 @@
 use crate::{iter::TreeNode, prelude::TreeNodeMut};
 
 /// A generic tree node implementation.
-/// 
+///
 /// This struct provides a simple implementation of a tree node with a value and a vector of children.
 /// It implements both `TreeNode` and `TreeNodeMut` traits, allowing it to be used with both
 /// immutable and mutable iterators.
-/// 
+///
 /// # Type Parameters
-/// 
+///
 /// * `T` - The type of value stored in each node.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```rust
 /// use tree_iter::tree::Node;
 /// use tree_iter::prelude::*;
-/// 
+///
 /// // Create a simple tree
 /// let tree = Node {
 ///     value: 1,
@@ -30,7 +30,7 @@ use crate::{iter::TreeNode, prelude::TreeNodeMut};
 ///         },
 ///     ],
 /// };
-/// 
+///
 /// // Traverse in depth-first order
 /// let values: Vec<i32> = tree.iter::<DepthFirst>()
 ///                           .map(|node| node.value)
@@ -45,7 +45,7 @@ pub struct Node<T> {
 }
 
 /// Implementation of `TreeNode` for `Node<T>`.
-/// 
+///
 /// This allows immutable iteration over the tree.
 impl<T> TreeNode for Node<T> {
     /// Returns an iterator over the children of this node.
@@ -55,7 +55,7 @@ impl<T> TreeNode for Node<T> {
 }
 
 /// Implementation of `TreeNodeMut` for `Node<T>`.
-/// 
+///
 /// This allows mutable iteration over the tree.
 impl<T> TreeNodeMut for Node<T> {
     /// Returns a mutable iterator over the children of this node.
@@ -103,12 +103,10 @@ mod tests {
                 },
                 Node {
                     value: 3,
-                    children: vec![
-                        Node {
-                            value: 6,
-                            children: vec![],
-                        },
-                    ],
+                    children: vec![Node {
+                        value: 6,
+                        children: vec![],
+                    }],
                 },
             ],
         };
@@ -137,12 +135,10 @@ mod tests {
                 },
                 Node {
                     value: 3,
-                    children: vec![
-                        Node {
-                            value: 6,
-                            children: vec![],
-                        },
-                    ],
+                    children: vec![Node {
+                        value: 6,
+                        children: vec![],
+                    }],
                 },
             ],
         };
@@ -185,12 +181,10 @@ mod tests {
             children: vec![
                 Node {
                     value: 2,
-                    children: vec![
-                        Node {
-                            value: 4,
-                            children: vec![],
-                        },
-                    ],
+                    children: vec![Node {
+                        value: 4,
+                        children: vec![],
+                    }],
                 },
                 Node {
                     value: 3,
@@ -199,15 +193,21 @@ mod tests {
             ],
         };
 
-        // Add 10 to each value in the tree
+        // Add 10 to each value in the tree, and add a child to node with value 2
         let mut iter = tree.iter_mut::<BreadthFirst>();
         while let Some(mut node) = iter.next() {
+            if node.value == 2 {
+                node.children.push(Node {
+                    value: 10,
+                    children: vec![],
+                });
+            }
             node.value += 10;
         }
 
         // Verify values were changed in breadth-first order
         let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|n| n.value).collect();
-        assert_eq!(values, vec![11, 12, 13, 14]);
+        assert_eq!(values, vec![11, 12, 13, 14, 20]);
     }
 
     #[test]
@@ -226,31 +226,31 @@ mod tests {
                 },
             ],
         };
-        
+
         // Verify initial structure
         let initial_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(initial_values, vec![1, 2, 3]);
-        
+
         // Modify the tree directly, avoiding iterator with borrow issues
         tree.children[0].children.push(Node {
             value: 20,
             children: vec![],
         });
-        
+
         tree.children[1].children.push(Node {
             value: 30,
             children: vec![],
         });
-        
+
         // Verify the modified structure
         let final_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(final_values, vec![1, 2, 20, 3, 30]);
     }
-    
+
     #[test]
     fn test_complex_tree_traversal() {
         // Create a more complex tree
-        let tree = Node {
+        let mut tree = Node {
             value: 1,
             children: vec![
                 Node {
@@ -258,12 +258,10 @@ mod tests {
                     children: vec![
                         Node {
                             value: 4,
-                            children: vec![
-                                Node {
-                                    value: 7,
-                                    children: vec![],
-                                },
-                            ],
+                            children: vec![Node {
+                                value: 7,
+                                children: vec![],
+                            }],
                         },
                         Node {
                             value: 5,
@@ -273,31 +271,45 @@ mod tests {
                 },
                 Node {
                     value: 3,
-                    children: vec![
-                        Node {
-                            value: 6,
-                            children: vec![
-                                Node {
-                                    value: 8,
-                                    children: vec![],
-                                },
-                                Node {
-                                    value: 9,
-                                    children: vec![],
-                                },
-                            ],
-                        },
-                    ],
+                    children: vec![Node {
+                        value: 6,
+                        children: vec![
+                            Node {
+                                value: 8,
+                                children: vec![],
+                            },
+                            Node {
+                                value: 9,
+                                children: vec![],
+                            },
+                        ],
+                    }],
                 },
             ],
         };
-        
+
         // Test depth-first traversal
         let df_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(df_values, vec![1, 2, 4, 7, 5, 3, 6, 8, 9]);
-        
+
+        // Test mutable depth-first traversal
+        let mut df_values_mut = vec![];
+        let mut iter = tree.iter_mut::<DepthFirst>();
+        while let Some(node) = iter.next() {
+            df_values_mut.push(node.value);
+        }
+        assert_eq!(df_values_mut, vec![1, 2, 4, 7, 5, 3, 6, 8, 9]);
+
         // Test breadth-first traversal
         let bf_values: Vec<i32> = tree.iter::<BreadthFirst>().map(|n| n.value).collect();
         assert_eq!(bf_values, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        // Test mutable breadth-first traversal
+        let mut bf_values_mut = vec![];
+        let mut iter = tree.iter_mut::<BreadthFirst>();
+        while let Some(node) = iter.next() {
+            bf_values_mut.push(node.value);
+        }
+        assert_eq!(bf_values_mut, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 }
