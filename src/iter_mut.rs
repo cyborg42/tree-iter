@@ -168,7 +168,7 @@ impl<N: TreeNodeMut> Drop for MutRefDFSGuard<'_, '_, N> {
     /// is processed first.
     fn drop(&mut self) {
         let node = self.node.take().unwrap();
-        for child in node.children_mut() {
+        for child in node.children_mut().rev() {
             self.iter.nodes.push_front(child);
         }
     }
