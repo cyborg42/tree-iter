@@ -20,16 +20,7 @@ use tree_iter::tree::Node;
 // Create a simple tree
 let tree = Node {
     value: 1,
-    children: vec![
-        Node {
-            value: 2,
-            children: vec![],
-        },
-        Node {
-            value: 3,
-            children: vec![],
-        },
-    ],
+    children: vec![Node::new(2), Node::new(3)],
 };
 
 // Iterate over the tree in depth-first order
@@ -58,15 +49,9 @@ let mut tree = Node {
     children: vec![
         Node {
             value: 2,
-            children: vec![Node {
-                value: 4,
-                children: vec![],
-            }],
+            children: vec![Node::new(4)],
         },
-        Node {
-            value: 3,
-            children: vec![],
-        },
+        Node::new(3),
     ],
 };
 
@@ -74,10 +59,7 @@ let mut tree = Node {
 let mut iter = tree.iter_mut::<BreadthFirst>();
 while let Some(mut node) = iter.next() {
     if node.value == 2 {
-        node.children.push(Node {
-            value: 10,
-            children: vec![],
-        });
+        node.children.push(Node::new(10));
     }
     node.value += 10;
 }
@@ -85,6 +67,37 @@ while let Some(mut node) = iter.next() {
 // Verify values were changed in breadth-first order
 let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|n| n.value).collect();
 assert_eq!(values, vec![11, 12, 13, 14, 20]);
+```
+
+### Forest Iteration
+
+Iterate over a forest of trees:
+
+```rust
+use tree_iter::prelude::*;
+use tree_iter::tree::Node;
+
+// Create a forest with two trees
+let mut forest = vec![
+    Node {
+        value: 1,
+        children: vec![Node::new(2)],
+    },
+    Node {
+        value: 3,
+        children: vec![Node::new(4)],
+    },
+];
+// Create a mutable iterator over the forest
+let mut iter = TreeMutIter::<'_, _, BreadthFirst>::new(forest.iter_mut());
+while let Some(mut node) = iter.next() {
+    node.value += 10;
+}
+// Verify the modified structure
+let value = TreeIter::<'_, _, BreadthFirst>::new(forest.iter())
+    .map(|node| node.value)
+    .collect::<Vec<_>>();
+assert_eq!(value, vec![11, 13, 12, 14]);
 ```
 
 ### Custom Tree Structures

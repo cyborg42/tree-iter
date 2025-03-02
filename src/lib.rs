@@ -23,16 +23,7 @@
  * // Create a simple tree
  * let tree = Node {
  *     value: 1,
- *     children: vec![
- *         Node {
- *             value: 2,
- *             children: vec![],
- *         },
- *         Node {
- *             value: 3,
- *             children: vec![],
- *         },
- *     ],
+ *     children: vec![Node::new(2), Node::new(3)],
  * };
  *
  * // Iterate over the tree in depth-first order
@@ -54,7 +45,7 @@ pub mod tree;
 
 /// Prelude module for convenient imports of common types
 pub mod prelude {
-    pub use crate::iter::TreeNode;
-    pub use crate::iter_mut::TreeNodeMut;
+    pub use crate::iter::{TreeIter, TreeNode};
+    pub use crate::iter_mut::{TreeMutIter, TreeNodeMut};
     pub use crate::traversal_order::{BreadthFirst, DepthFirst, TraversalOrder};
 }

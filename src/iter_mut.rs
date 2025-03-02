@@ -24,10 +24,7 @@ use crate::traversal_order::{BreadthFirst, DepthFirst, TraversalOrder};
 /// // Create a simple tree
 /// let mut tree = Node {
 ///     value: 1,
-///     children: vec![
-///         Node { value: 2, children: vec![] },
-///         Node { value: 3, children: vec![] },
-///     ],
+///     children: vec![Node::new(2), Node::new(3)],
 /// };
 ///
 /// // Mutably iterate and modify values
@@ -96,6 +93,7 @@ impl<'a, N, T> TreeMutIter<'a, N, T> {
 /// are correctly added to the traversal queue in breadth-first order.
 ///
 /// The guard implements `Deref` and `DerefMut` to allow direct access to the underlying node.
+#[derive(Debug)]
 pub struct MutRefBFSGuard<'a: 'b, 'b, N: TreeNodeMut> {
     /// Reference to the tree iterator.
     iter: &'b mut TreeMutIter<'a, N, BreadthFirst>,
@@ -150,6 +148,7 @@ impl<'a, N: TreeNodeMut> TreeMutIter<'a, N, BreadthFirst> {
 /// are correctly added to the traversal queue in depth-first order.
 ///
 /// The guard implements `Deref` and `DerefMut` to allow direct access to the underlying node.
+#[derive(Debug)]
 pub struct MutRefDFSGuard<'a: 'b, 'b, N: TreeNodeMut> {
     /// Reference to the tree iterator.
     iter: &'b mut TreeMutIter<'a, N, DepthFirst>,
@@ -198,122 +197,5 @@ impl<'a, N: TreeNodeMut> TreeMutIter<'a, N, DepthFirst> {
             iter: self,
             node: Some(node),
         })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-    use crate::tree::Node;
-
-    #[test]
-    fn test_mutable_depth_first_traversal() {
-        // Create a test tree:
-        //      1
-        //     / \
-        //    2   3
-        let mut tree = Node {
-            value: 1,
-            children: vec![Node::new(2), Node::new(3)],
-        };
-
-        // Double each value using mutable depth-first traversal
-        {
-            let mut iter = tree.iter_mut::<DepthFirst>();
-            while let Some(mut node) = iter.next() {
-                node.value = node.value * 2;
-            }
-        }
-
-        // Verify the values were modified correctly
-        let values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
-        assert_eq!(values, vec![2, 4, 6]);
-    }
-
-    #[test]
-    fn test_mutable_breadth_first_traversal() {
-        // Create a test tree:
-        //      1
-        //     / \
-        //    2   3
-        //   /
-        //  4
-        let mut tree = Node {
-            value: 1,
-            children: vec![
-                Node {
-                    value: 2,
-                    children: vec![Node::new(4)],
-                },
-                Node::new(3),
-            ],
-        };
-
-        // Add 10 to each value using mutable breadth-first traversal
-        {
-            let mut iter = tree.iter_mut::<BreadthFirst>();
-            while let Some(mut node) = iter.next() {
-                node.value += 10;
-            }
-        }
-
-        // Verify the values were modified correctly
-        let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|node| node.value).collect();
-        assert_eq!(values, vec![11, 12, 13, 14]);
-    }
-
-    #[test]
-    fn test_forest_mutable_traversal() {
-        // Create two trees
-        let mut tree1 = Node {
-            value: 1,
-            children: vec![Node::new(2)],
-        };
-        let mut tree2 = Node {
-            value: 3,
-            children: vec![Node::new(4)],
-        };
-
-        // Create a vector to hold mutable references
-        let mut roots = Vec::new();
-        roots.push(&mut tree1);
-        roots.push(&mut tree2);
-
-        // Create a mutable iterator with multiple roots - modify one at a time
-        for tree in &mut roots {
-            let mut iter = tree.iter_mut::<DepthFirst>();
-            while let Some(mut node) = iter.next() {
-                node.value += 100;
-            }
-        }
-
-        // Verify the values were modified
-        let values1: Vec<i32> = tree1.iter::<DepthFirst>().map(|node| node.value).collect();
-        let values2: Vec<i32> = tree2.iter::<DepthFirst>().map(|node| node.value).collect();
-
-        assert_eq!(values1, vec![101, 102]);
-        assert_eq!(values2, vec![103, 104]);
-    }
-
-    #[test]
-    fn test_adding_children_during_traversal() {
-        // Create a simple tree
-        let mut tree = Node::new(1);
-
-        // Add children during traversal
-        {
-            let mut iter = tree.iter_mut::<DepthFirst>();
-            while let Some(mut node) = iter.next() {
-                // Only add children to the root node
-                if node.value == 1 {
-                    node.children.push(Node::new(2));
-                    node.children.push(Node::new(3));
-                }
-            }
-        }
-
-        // Verify the new structure
-        let values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
-        assert_eq!(values, vec![1, 2, 3]);
     }
 }

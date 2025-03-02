@@ -19,16 +19,7 @@ use crate::{iter::TreeNode, prelude::TreeNodeMut};
 /// // Create a simple tree
 /// let tree = Node {
 ///     value: 1,
-///     children: vec![
-///         Node {
-///             value: 2,
-///             children: vec![],
-///         },
-///         Node {
-///             value: 3,
-///             children: vec![],
-///         },
-///     ],
+///     children: vec![Node::new(2), Node::new(3)],
 /// };
 ///
 /// // Traverse in depth-first order
@@ -37,6 +28,7 @@ use crate::{iter::TreeNode, prelude::TreeNodeMut};
 ///                           .collect();
 /// assert_eq!(values, vec![1, 2, 3]);
 /// ```
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
 pub struct Node<T> {
     /// The value stored in this node.
     pub value: T,
@@ -196,12 +188,36 @@ mod tests {
 
         // Modify the tree directly, avoiding iterator with borrow issues
         tree.children[0].children.push(Node::new(20));
-
         tree.children[1].children.push(Node::new(30));
 
         // Verify the modified structure
         let final_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(final_values, vec![1, 2, 20, 3, 30]);
+    }
+
+    #[test]
+    fn test_forest_traversal() {
+        // Create a forest with two trees
+        let mut forest = vec![
+            Node {
+                value: 1,
+                children: vec![Node::new(2)],
+            },
+            Node {
+                value: 3,
+                children: vec![Node::new(4)],
+            },
+        ];
+        // Create a mutable iterator over the forest
+        let mut iter = TreeMutIter::<'_, _, BreadthFirst>::new(forest.iter_mut());
+        while let Some(mut node) = iter.next() {
+            node.value += 10;
+        }
+        // Verify the modified structure
+        let value = TreeIter::<'_, _, BreadthFirst>::new(forest.iter())
+            .map(|node| node.value)
+            .collect::<Vec<_>>();
+        assert_eq!(value, vec![11, 13, 12, 14]);
     }
 
     #[test]

@@ -69,6 +69,7 @@ pub trait TreeNode {
 /// * `'a` - The lifetime of the tree nodes being traversed.
 /// * `N` - The type of tree node.
 /// * `T` - The traversal order strategy (e.g., `DepthFirst` or `BreadthFirst`).
+#[derive(Debug)]
 pub struct TreeIter<'a, N, T> {
     /// Queue of nodes to be visited.
     nodes: VecDeque<&'a N>,
@@ -82,7 +83,7 @@ impl<'a, N, T: TraversalOrder> TreeIter<'a, N, T> {
     /// # Parameters
     ///
     /// * `roots` - An iterator yielding the root nodes to start traversal from.
-    fn new(roots: impl IntoIterator<Item = &'a N>) -> Self {
+    pub fn new(roots: impl IntoIterator<Item = &'a N>) -> Self {
         Self {
             nodes: roots.into_iter().collect(),
             _order: PhantomData,
@@ -117,92 +118,5 @@ impl<'a, N: TreeNode> Iterator for TreeIter<'a, N, DepthFirst> {
             self.nodes.push_front(child);
         }
         Some(node)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::*;
-    use crate::tree::Node;
-
-    #[test]
-    fn test_custom_tree_depth_first() {
-        // Create a test tree:
-        //      1
-        //     / \
-        //    2   3
-        //   / \
-        //  4   5
-        let tree = Node {
-            value: 1,
-            children: vec![
-                Node {
-                    value: 2,
-                    children: vec![Node::new(4), Node::new(5)],
-                },
-                Node::new(3),
-            ],
-        };
-
-        // Collect values in depth-first order
-        let values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
-        assert_eq!(values, vec![1, 2, 4, 5, 3]);
-    }
-
-    #[test]
-    fn test_custom_tree_breadth_first() {
-        // Create a test tree:
-        //      1
-        //     / \
-        //    2   3
-        //   / \
-        //  4   5
-        let tree = Node {
-            value: 1,
-            children: vec![
-                Node {
-                    value: 2,
-                    children: vec![Node::new(4), Node::new(5)],
-                },
-                Node::new(3),
-            ],
-        };
-
-        // Collect values in breadth-first order
-        let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|node| node.value).collect();
-        assert_eq!(values, vec![1, 2, 3, 4, 5]);
-    }
-
-    #[test]
-    fn test_empty_custom_tree() {
-        let tree = Node::<i32>::new(42);
-
-        // Test depth-first traversal
-        let df_values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
-        assert_eq!(df_values, vec![42]);
-
-        // Test breadth-first traversal
-        let bf_values: Vec<i32> = tree.iter::<BreadthFirst>().map(|node| node.value).collect();
-        assert_eq!(bf_values, vec![42]);
-    }
-
-    #[test]
-    fn test_forest_traversal() {
-        // Test traversing a forest (multiple root nodes)
-        let tree1 = Node {
-            value: 1,
-            children: vec![Node::new(2)],
-        };
-        let tree2 = Node {
-            value: 3,
-            children: vec![Node::new(4)],
-        };
-
-        // Create an iterator with multiple roots
-        let forest_iter = super::TreeIter::<_, DepthFirst>::new([&tree1, &tree2]);
-        let values: Vec<i32> = forest_iter.map(|node| node.value).collect();
-
-        // Should traverse tree1 completely before starting tree2
-        assert_eq!(values, vec![1, 2, 3, 4]);
     }
 }
