@@ -1,0 +1,16 @@
+[package]
+name = "tree-iter"
+version = "0.1.0"
+edition = "2024"
+authors = ["Maverick Liu <maverick.liu42@gmail.com>"]
+description = "A Rust library for iterating over tree structures"
+repository = "https://github.com/cyborg42/tree-iter"
+documentation = "https://docs.rs/tree-iter"
+license = "MIT"
+keywords = ["tree", "iterator"]
+categories = ["data-structures", "algorithms"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
