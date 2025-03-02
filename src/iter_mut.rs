@@ -4,10 +4,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use crate::{
-    prelude::TraversalOrder,
-    traversal_order::{BreadthFirst, DepthFirst},
-};
+use crate::traversal_order::{BreadthFirst, DepthFirst, TraversalOrder};
 
 /// Trait for mutable tree traversal.
 ///
@@ -46,7 +43,7 @@ pub trait TreeNodeMut {
     /// Returns a mutable iterator over the children of this node.
     ///
     /// This method must be implemented by all types implementing `TreeNodeMut`.
-    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> + '_;
+    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self>;
 
     /// Creates a mutable iterator that traverses the tree starting from this node.
     ///
@@ -207,39 +204,7 @@ impl<'a, N: TreeNodeMut> TreeMutIter<'a, N, DepthFirst> {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-
-    // Define a simple tree structure for testing
-    struct TestTree<T> {
-        value: T,
-        children: Vec<TestTree<T>>,
-    }
-
-    impl<T> TestTree<T> {
-        fn new(value: T) -> Self {
-            Self {
-                value,
-                children: Vec::new(),
-            }
-        }
-
-        fn with_children(value: T, children: Vec<TestTree<T>>) -> Self {
-            Self { value, children }
-        }
-    }
-
-    // Implement TreeNode for TestTree
-    impl<T> crate::iter::TreeNode for TestTree<T> {
-        fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
-            self.children.iter()
-        }
-    }
-
-    // Implement TreeNodeMut for TestTree
-    impl<T> super::TreeNodeMut for TestTree<T> {
-        fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> + '_ {
-            self.children.iter_mut()
-        }
-    }
+    use crate::tree::Node;
 
     #[test]
     fn test_mutable_depth_first_traversal() {
@@ -247,7 +212,10 @@ mod tests {
         //      1
         //     / \
         //    2   3
-        let mut tree = TestTree::with_children(1, vec![TestTree::new(2), TestTree::new(3)]);
+        let mut tree = Node {
+            value: 1,
+            children: vec![Node::new(2), Node::new(3)],
+        };
 
         // Double each value using mutable depth-first traversal
         {
@@ -270,13 +238,16 @@ mod tests {
         //    2   3
         //   /
         //  4
-        let mut tree = TestTree::with_children(
-            1,
-            vec![
-                TestTree::with_children(2, vec![TestTree::new(4)]),
-                TestTree::new(3),
+        let mut tree = Node {
+            value: 1,
+            children: vec![
+                Node {
+                    value: 2,
+                    children: vec![Node::new(4)],
+                },
+                Node::new(3),
             ],
-        );
+        };
 
         // Add 10 to each value using mutable breadth-first traversal
         {
@@ -294,8 +265,14 @@ mod tests {
     #[test]
     fn test_forest_mutable_traversal() {
         // Create two trees
-        let mut tree1 = TestTree::with_children(1, vec![TestTree::new(2)]);
-        let mut tree2 = TestTree::with_children(3, vec![TestTree::new(4)]);
+        let mut tree1 = Node {
+            value: 1,
+            children: vec![Node::new(2)],
+        };
+        let mut tree2 = Node {
+            value: 3,
+            children: vec![Node::new(4)],
+        };
 
         // Create a vector to hold mutable references
         let mut roots = Vec::new();
@@ -321,7 +298,7 @@ mod tests {
     #[test]
     fn test_adding_children_during_traversal() {
         // Create a simple tree
-        let mut tree = TestTree::new(1);
+        let mut tree = Node::new(1);
 
         // Add children during traversal
         {
@@ -329,8 +306,8 @@ mod tests {
             while let Some(mut node) = iter.next() {
                 // Only add children to the root node
                 if node.value == 1 {
-                    node.children.push(TestTree::new(2));
-                    node.children.push(TestTree::new(3));
+                    node.children.push(Node::new(2));
+                    node.children.push(Node::new(3));
                 }
             }
         }

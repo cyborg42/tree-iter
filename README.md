@@ -101,14 +101,14 @@ struct MyTree<T> {
 
 // Implement TreeNode for immutable iteration
 impl<T> TreeNode for MyTree<T> {
-    fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
+    fn children(&self) -> impl DoubleEndedIterator<Item = &Self> {
         self.children.iter()
     }
 }
 
 // Implement TreeNodeMut for mutable iteration
 impl<T> TreeNodeMut for MyTree<T> {
-    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> + '_ {
+    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> {
         self.children.iter_mut()
     }
 }

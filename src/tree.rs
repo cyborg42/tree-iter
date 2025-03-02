@@ -44,12 +44,30 @@ pub struct Node<T> {
     pub children: Vec<Node<T>>,
 }
 
+impl<T> Node<T> {
+    /// Creates a new node with the given value and no children.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - The value to store in the node.
+    ///
+    /// # Returns
+    ///
+    /// A new `Node` with the given value and an empty children vector.
+    pub fn new(value: T) -> Self {
+        Self {
+            value,
+            children: Vec::new(),
+        }
+    }
+}
+
 /// Implementation of `TreeNode` for `Node<T>`.
 ///
 /// This allows immutable iteration over the tree.
 impl<T> TreeNode for Node<T> {
     /// Returns an iterator over the children of this node.
-    fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
+    fn children(&self) -> impl DoubleEndedIterator<Item = &Self> {
         self.children.iter()
     }
 }
@@ -59,7 +77,7 @@ impl<T> TreeNode for Node<T> {
 /// This allows mutable iteration over the tree.
 impl<T> TreeNodeMut for Node<T> {
     /// Returns a mutable iterator over the children of this node.
-    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> + '_ {
+    fn children_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self> {
         self.children.iter_mut()
     }
 }
@@ -71,11 +89,7 @@ mod tests {
 
     #[test]
     fn test_empty_tree() {
-        let tree: Node<i32> = Node {
-            value: 42,
-            children: vec![],
-        };
-
+        let tree: Node<i32> = Node::new(42);
         let values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
         assert_eq!(values, vec![42]);
 
@@ -90,23 +104,11 @@ mod tests {
             children: vec![
                 Node {
                     value: 2,
-                    children: vec![
-                        Node {
-                            value: 4,
-                            children: vec![],
-                        },
-                        Node {
-                            value: 5,
-                            children: vec![],
-                        },
-                    ],
+                    children: vec![Node::new(4), Node::new(5)],
                 },
                 Node {
                     value: 3,
-                    children: vec![Node {
-                        value: 6,
-                        children: vec![],
-                    }],
+                    children: vec![Node::new(6)],
                 },
             ],
         };
@@ -122,23 +124,11 @@ mod tests {
             children: vec![
                 Node {
                     value: 2,
-                    children: vec![
-                        Node {
-                            value: 4,
-                            children: vec![],
-                        },
-                        Node {
-                            value: 5,
-                            children: vec![],
-                        },
-                    ],
+                    children: vec![Node::new(4), Node::new(5)],
                 },
                 Node {
                     value: 3,
-                    children: vec![Node {
-                        value: 6,
-                        children: vec![],
-                    }],
+                    children: vec![Node::new(6)],
                 },
             ],
         };
@@ -151,16 +141,7 @@ mod tests {
     fn test_mutable_depth_first_traversal() {
         let mut tree = Node {
             value: 1,
-            children: vec![
-                Node {
-                    value: 2,
-                    children: vec![],
-                },
-                Node {
-                    value: 3,
-                    children: vec![],
-                },
-            ],
+            children: vec![Node::new(2), Node::new(3)],
         };
 
         // Double each value in the tree
@@ -181,15 +162,9 @@ mod tests {
             children: vec![
                 Node {
                     value: 2,
-                    children: vec![Node {
-                        value: 4,
-                        children: vec![],
-                    }],
+                    children: vec![Node::new(4)],
                 },
-                Node {
-                    value: 3,
-                    children: vec![],
-                },
+                Node::new(3),
             ],
         };
 
@@ -197,10 +172,7 @@ mod tests {
         let mut iter = tree.iter_mut::<BreadthFirst>();
         while let Some(mut node) = iter.next() {
             if node.value == 2 {
-                node.children.push(Node {
-                    value: 10,
-                    children: vec![],
-                });
+                node.children.push(Node::new(10));
             }
             node.value += 10;
         }
@@ -215,16 +187,7 @@ mod tests {
         // Create a tree manually with specific structure
         let mut tree = Node {
             value: 1,
-            children: vec![
-                Node {
-                    value: 2,
-                    children: vec![],
-                },
-                Node {
-                    value: 3,
-                    children: vec![],
-                },
-            ],
+            children: vec![Node::new(2), Node::new(3)],
         };
 
         // Verify initial structure
@@ -232,15 +195,9 @@ mod tests {
         assert_eq!(initial_values, vec![1, 2, 3]);
 
         // Modify the tree directly, avoiding iterator with borrow issues
-        tree.children[0].children.push(Node {
-            value: 20,
-            children: vec![],
-        });
+        tree.children[0].children.push(Node::new(20));
 
-        tree.children[1].children.push(Node {
-            value: 30,
-            children: vec![],
-        });
+        tree.children[1].children.push(Node::new(30));
 
         // Verify the modified structure
         let final_values: Vec<i32> = tree.iter::<DepthFirst>().map(|n| n.value).collect();
@@ -258,31 +215,16 @@ mod tests {
                     children: vec![
                         Node {
                             value: 4,
-                            children: vec![Node {
-                                value: 7,
-                                children: vec![],
-                            }],
+                            children: vec![Node::new(7)],
                         },
-                        Node {
-                            value: 5,
-                            children: vec![],
-                        },
+                        Node::new(5),
                     ],
                 },
                 Node {
                     value: 3,
                     children: vec![Node {
                         value: 6,
-                        children: vec![
-                            Node {
-                                value: 8,
-                                children: vec![],
-                            },
-                            Node {
-                                value: 9,
-                                children: vec![],
-                            },
-                        ],
+                        children: vec![Node::new(8), Node::new(9)],
                     }],
                 },
             ],

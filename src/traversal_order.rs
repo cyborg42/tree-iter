@@ -43,7 +43,7 @@ mod tests {
     }
 
     impl<T> TreeNode for TestNode<T> {
-        fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
+        fn children(&self) -> impl DoubleEndedIterator<Item = &Self> {
             self.children.iter()
         }
     }

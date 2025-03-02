@@ -22,7 +22,7 @@ use crate::traversal_order::{BreadthFirst, DepthFirst, TraversalOrder};
 ///
 /// // Implement TreeNode for custom tree structure
 /// impl<T> TreeNode for MyTree<T> {
-///     fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
+///     fn children(&self) -> impl DoubleEndedIterator<Item = &Self> {
 ///         self.children.iter()
 ///     }
 /// }
@@ -44,7 +44,7 @@ pub trait TreeNode {
     /// Returns an iterator over the children of this node.
     ///
     /// This method must be implemented by all types implementing `TreeNode`.
-    fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_;
+    fn children(&self) -> impl DoubleEndedIterator<Item = &Self>;
 
     /// Creates an iterator that traverses the tree starting from this node.
     ///
@@ -123,32 +123,7 @@ impl<'a, N: TreeNode> Iterator for TreeIter<'a, N, DepthFirst> {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-
-    // Define a simple tree structure for testing
-    struct TestTree<T> {
-        value: T,
-        children: Vec<TestTree<T>>,
-    }
-
-    impl<T> TestTree<T> {
-        fn new(value: T) -> Self {
-            Self {
-                value,
-                children: Vec::new(),
-            }
-        }
-
-        fn with_children(value: T, children: Vec<TestTree<T>>) -> Self {
-            Self { value, children }
-        }
-    }
-
-    // Implement TreeNode for TestTree
-    impl<T> super::TreeNode for TestTree<T> {
-        fn children(&self) -> impl DoubleEndedIterator<Item = &Self> + '_ {
-            self.children.iter()
-        }
-    }
+    use crate::tree::Node;
 
     #[test]
     fn test_custom_tree_depth_first() {
@@ -158,13 +133,16 @@ mod tests {
         //    2   3
         //   / \
         //  4   5
-        let tree = TestTree::with_children(
-            1,
-            vec![
-                TestTree::with_children(2, vec![TestTree::new(4), TestTree::new(5)]),
-                TestTree::new(3),
+        let tree = Node {
+            value: 1,
+            children: vec![
+                Node {
+                    value: 2,
+                    children: vec![Node::new(4), Node::new(5)],
+                },
+                Node::new(3),
             ],
-        );
+        };
 
         // Collect values in depth-first order
         let values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
@@ -179,13 +157,16 @@ mod tests {
         //    2   3
         //   / \
         //  4   5
-        let tree = TestTree::with_children(
-            1,
-            vec![
-                TestTree::with_children(2, vec![TestTree::new(4), TestTree::new(5)]),
-                TestTree::new(3),
+        let tree = Node {
+            value: 1,
+            children: vec![
+                Node {
+                    value: 2,
+                    children: vec![Node::new(4), Node::new(5)],
+                },
+                Node::new(3),
             ],
-        );
+        };
 
         // Collect values in breadth-first order
         let values: Vec<i32> = tree.iter::<BreadthFirst>().map(|node| node.value).collect();
@@ -194,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_empty_custom_tree() {
-        let tree = TestTree::<i32>::new(42);
+        let tree = Node::<i32>::new(42);
 
         // Test depth-first traversal
         let df_values: Vec<i32> = tree.iter::<DepthFirst>().map(|node| node.value).collect();
@@ -208,8 +189,14 @@ mod tests {
     #[test]
     fn test_forest_traversal() {
         // Test traversing a forest (multiple root nodes)
-        let tree1 = TestTree::with_children(1, vec![TestTree::new(2)]);
-        let tree2 = TestTree::with_children(3, vec![TestTree::new(4)]);
+        let tree1 = Node {
+            value: 1,
+            children: vec![Node::new(2)],
+        };
+        let tree2 = Node {
+            value: 3,
+            children: vec![Node::new(4)],
+        };
 
         // Create an iterator with multiple roots
         let forest_iter = super::TreeIter::<_, DepthFirst>::new([&tree1, &tree2]);
