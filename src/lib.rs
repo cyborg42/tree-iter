@@ -46,6 +46,6 @@ pub mod tree;
 /// Prelude module for convenient imports of common types
 pub mod prelude {
     pub use crate::iter::{TreeIter, TreeNode};
-    pub use crate::iter_mut::{TreeMutIter, TreeNodeMut};
+    pub use crate::iter_mut::{TreeIterMut, TreeNodeMut};
     pub use crate::traversal_order::{BreadthFirst, DepthFirst, TraversalOrder};
 }

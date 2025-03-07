@@ -89,7 +89,7 @@ let mut forest = vec![
     },
 ];
 // Create a mutable iterator over the forest
-let mut iter = TreeMutIter::<'_, _, BreadthFirst>::new(forest.iter_mut());
+let mut iter = TreeIterMut::<'_, _, BreadthFirst>::new(forest.iter_mut());
 while let Some(mut node) = iter.next() {
     node.value += 10;
 }
